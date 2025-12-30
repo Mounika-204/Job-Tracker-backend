@@ -17,7 +17,7 @@ app.use(express.json());
 /* ✅ CORS */
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://job-tracker-frontend-5m6x.onrender.com",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
