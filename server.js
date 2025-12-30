@@ -7,12 +7,14 @@ import userRoutes from "./routes/userRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 
 dotenv.config();
-connectDB(); // ✅ ONLY ONE DB CONNECTION
+connectDB(); // ✅ DB connect once
 
 const app = express();
 
-/* ✅ MIDDLEWARES */
+/* ✅ BODY PARSER */
 app.use(express.json());
+
+/* ✅ CORS */
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -22,18 +24,25 @@ app.use(
   })
 );
 
-/* ✅ LOGGING */
+/* ✅ URL CLEAN + LOG (VERY IMPORTANT) */
 app.use((req, res, next) => {
+  // decode %0A, %20 etc
+  const decodedUrl = decodeURIComponent(req.url);
+  req.url = decodedUrl.replace(/\s+/g, "");
   console.log("Incoming request:", req.method, req.url);
   next();
 });
 
-/* ✅ TEST ROUTE */
-app.get("/test", (req, res) => {
-  res.send("Server OK");
+/* ✅ TEST ROUTES */
+app.get("/", (req, res) => {
+  res.send("Job Tracker Backend is Running 🚀");
 });
 
-/* ✅ ROUTES */
+app.post("/api/test", (req, res) => {
+  res.json({ message: "TEST OK" });
+});
+
+/* ✅ MAIN ROUTES */
 app.use("/api/users", userRoutes);
 app.use("/api/jobs", jobRoutes);
 
