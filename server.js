@@ -2,9 +2,9 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
-
 import userRoutes from "./routes/userRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
+import resumeRoutes from "./routes/resumeRoutes.js";
 
 dotenv.config();
 connectDB(); // ✅ DB connect once
@@ -17,7 +17,7 @@ app.use(express.json());
 /* ✅ CORS */
 app.use(
   cors({
-    origin: "https://job-tracker-frontend-5m6x.onrender.com",
+    origin:"https://job-tracker-frontend-5m6x.onrender.com",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -45,6 +45,8 @@ app.post("/api/test", (req, res) => {
 /* ✅ MAIN ROUTES */
 app.use("/api/users", userRoutes);
 app.use("/api/jobs", jobRoutes);
+app.use("/api/resume", resumeRoutes);
+
 
 /* ✅ SERVER */
 const PORT = process.env.PORT || 5000;
