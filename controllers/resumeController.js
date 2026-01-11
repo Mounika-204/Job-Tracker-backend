@@ -1,3 +1,8 @@
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const pdf = require("pdf-parse");
+
+/* ✅ 1. generateResume */
 export const generateResume = async (req, res) => {
   try {
     const { jobRole } = req.body;
@@ -31,6 +36,33 @@ export const generateResume = async (req, res) => {
   }
 };
 
+/* ✅ 2. optimizeResume */
+export const optimizeResume = async (req, res) => {
+  try {
+    const { jobRole } = req.body;
+    const resumeFile = req.file;
+
+    if (!resumeFile) {
+      return res.status(400).json({ message: "Resume file is required" });
+    }
+
+    const pdfData = await pdf(resumeFile.buffer);
+    const resumeText = pdfData.text;
+
+    const extractedSkills =
+      resumeText.match(/HTML|CSS|JavaScript|React|Node|Express|MongoDB/gi) || [];
+
+    res.status(200).json({
+      jobRole,
+      extractedSkills,
+      message: "Resume optimized successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Resume optimization failed" });
+  }
+};
+
+/* ✅ 3. saveResume */
 export const saveResume = async (req, res) => {
   try {
     res.status(201).json({
