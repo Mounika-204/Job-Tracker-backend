@@ -17,10 +17,16 @@ router.post("/generate", protect, generateResume);
 router.post(
   "/optimize",
   protect,
-  upload.single("resume"),
+  (req, res, next) => {
+    upload.single("resume")(req, res, (err) => {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+      next();
+    });
+  },
   optimizeResume
 );
-
 router.post("/save", protect, saveResume);
 
 export default router;

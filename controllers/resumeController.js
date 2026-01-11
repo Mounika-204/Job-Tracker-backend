@@ -54,7 +54,7 @@ export const optimizeResume = async (req, res) => {
     }
 
     // ✅ PDF parse
-    const pdfData = await pdf(resumeFile.buffer);
+    const pdfData = await pdfParse(resumeFile.buffer);
     const resumeText = pdfData.text;
 
     // ✅ Skill extraction
