@@ -1,4 +1,4 @@
-import { createRequire } from "module";
+import { createRequire } from "module"; 
 const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse");
 
@@ -15,23 +15,61 @@ export const generateResume = async (req, res) => {
 
     if (jobRole.toLowerCase().includes("frontend")) {
       resumeData = {
+        name: "Mounika Tulasi",
+        summary: "Frontend Developer with strong skills in React, JS, HTML, CSS, and experience building responsive web applications.",
         skills: ["HTML", "CSS", "JavaScript", "React"],
         projects: ["Portfolio Builder", "Job Tracker Frontend"],
+        experience: [
+          {
+            company: "Portfolio Builder",
+            role: "Frontend Developer",
+            description: "Created responsive portfolio using React."
+          },
+          {
+            company: "Job Tracker",
+            role: "Frontend Developer",
+            description: "Developed Job Tracker frontend with API integration."
+          }
+        ]
       };
     } else if (jobRole.toLowerCase().includes("backend")) {
       resumeData = {
+        name: "Mounika Tulasi",
+        summary: "Backend Developer with expertise in Node.js, Express, MongoDB, and building secure APIs.",
         skills: ["Node.js", "Express", "MongoDB"],
         projects: ["Job Tracker API", "Auth System"],
+        experience: [
+          {
+            company: "Job Tracker API",
+            role: "Backend Developer",
+            description: "Implemented RESTful APIs and database integration."
+          },
+          {
+            company: "Auth System",
+            role: "Backend Developer",
+            description: "Developed authentication & authorization system."
+          }
+        ]
       };
     } else {
       resumeData = {
+        name: "Mounika Tulasi",
+        summary: "Software Developer with core skills in JavaScript and problem solving.",
         skills: ["JavaScript", "Git", "Problem Solving"],
         projects: ["Job Tracker Project"],
+        experience: [
+          {
+            company: "Job Tracker Project",
+            role: "Developer",
+            description: "Worked on full-stack job tracking application."
+          }
+        ]
       };
     }
 
     res.status(200).json(resumeData);
   } catch (error) {
+    console.error("GENERATE ERROR:", error);
     res.status(500).json({ message: "Resume generation failed" });
   }
 };
@@ -50,7 +88,6 @@ export const optimizeResume = async (req, res) => {
       return res.status(400).json({ message: "Job role is required" });
     }
 
-    // ✅ PDF PARSE (WORKING)
     const pdfData = await pdfParse(resumeFile.buffer);
     const resumeText = pdfData.text;
 
