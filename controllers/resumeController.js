@@ -1,91 +1,84 @@
-import { createRequire } from "module"; 
+import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse");
 
-/* ✅ 1. generateResume */
+/* ===============================
+   1️⃣ GENERATE RESUME (FIXED)
+================================ */
 export const generateResume = async (req, res) => {
   try {
-    const { jobRole } = req.body;
+    const { jobRole, jobDescription } = req.body;
 
-    if (!jobRole) {
-      return res.status(400).json({ message: "jobRole is required" });
+    if (!jobRole || !jobDescription) {
+      return res.status(400).json({
+        message: "jobRole and jobDescription are required"
+      });
     }
 
-    let resumeData = {};
+    const jd = jobDescription.toLowerCase();
 
+    let skills = [];
+    let summary = "";
+    let projects = [];
+
+    /* 🔹 Dynamic skill extraction */
+    if (jd.includes("react")) skills.push("React");
+    if (jd.includes("javascript")) skills.push("JavaScript");
+    if (jd.includes("html")) skills.push("HTML");
+    if (jd.includes("css")) skills.push("CSS");
+    if (jd.includes("node")) skills.push("Node.js");
+    if (jd.includes("express")) skills.push("Express");
+    if (jd.includes("mongo")) skills.push("MongoDB");
+
+    /* 🔹 Role based summary */
     if (jobRole.toLowerCase().includes("frontend")) {
-      resumeData = {
-        name: "Mounika Tulasi",
-        summary: "Frontend Developer with strong skills in React, JS, HTML, CSS, and experience building responsive web applications.",
-        skills: ["HTML", "CSS", "JavaScript", "React"],
-        projects: ["Portfolio Builder", "Job Tracker Frontend"],
-        experience: [
-          {
-            company: "Portfolio Builder",
-            role: "Frontend Developer",
-            description: "Created responsive portfolio using React."
-          },
-          {
-            company: "Job Tracker",
-            role: "Frontend Developer",
-            description: "Developed Job Tracker frontend with API integration."
-          }
-        ]
-      };
+      summary =
+        "Frontend Developer skilled in building responsive and interactive web applications using modern JavaScript frameworks.";
+      projects = ["Portfolio Builder", "Job Tracker Frontend"];
     } else if (jobRole.toLowerCase().includes("backend")) {
-      resumeData = {
-        name: "Mounika Tulasi",
-        summary: "Backend Developer with expertise in Node.js, Express, MongoDB, and building secure APIs.",
-        skills: ["Node.js", "Express", "MongoDB"],
-        projects: ["Job Tracker API", "Auth System"],
-        experience: [
-          {
-            company: "Job Tracker API",
-            role: "Backend Developer",
-            description: "Implemented RESTful APIs and database integration."
-          },
-          {
-            company: "Auth System",
-            role: "Backend Developer",
-            description: "Developed authentication & authorization system."
-          }
-        ]
-      };
+      summary =
+        "Backend Developer experienced in building REST APIs, authentication systems, and database-driven applications.";
+      projects = ["Job Tracker API", "Auth System"];
     } else {
-      resumeData = {
-        name: "Mounika Tulasi",
-        summary: "Software Developer with core skills in JavaScript and problem solving.",
-        skills: ["JavaScript", "Git", "Problem Solving"],
-        projects: ["Job Tracker Project"],
-        experience: [
-          {
-            company: "Job Tracker Project",
-            role: "Developer",
-            description: "Worked on full-stack job tracking application."
-          }
-        ]
-      };
+      summary =
+        "Software Developer with strong problem-solving skills and full-stack development experience.";
+      projects = ["Job Tracker Full Stack Project"];
     }
+
+    const resumeData = {
+      name: "Mounika Tulasi",
+      jobRole,
+      summary,
+      skills: [...new Set(skills)],
+      projects,
+      experience: [
+        {
+          role: jobRole,
+          description: "Hands-on experience through real-world projects."
+        }
+      ]
+    };
 
     res.status(200).json(resumeData);
+
   } catch (error) {
     console.error("GENERATE ERROR:", error);
     res.status(500).json({ message: "Resume generation failed" });
   }
 };
 
-/* ✅ 2. optimizeResume */
+/* ===============================
+   2️⃣ OPTIMIZE RESUME (OK)
+================================ */
 export const optimizeResume = async (req, res) => {
   try {
     const { jobRole } = req.body;
     const resumeFile = req.file;
 
-    if (!resumeFile) {
-      return res.status(400).json({ message: "Resume file is required" });
-    }
-
-    if (!jobRole) {
-      return res.status(400).json({ message: "Job role is required" });
+    if (!resumeFile || !jobRole) {
+      return res.status(400).json({
+        message: "Resume file and jobRole are required"
+      });
     }
 
     const pdfData = await pdfParse(resumeFile.buffer);
@@ -98,7 +91,7 @@ export const optimizeResume = async (req, res) => {
       success: true,
       jobRole,
       extractedSkills: [...new Set(extractedSkills)],
-      message: "Resume optimized successfully",
+      message: "Resume optimized successfully"
     });
 
   } catch (error) {
@@ -107,12 +100,14 @@ export const optimizeResume = async (req, res) => {
   }
 };
 
-/* ✅ 3. saveResume */
+/* ===============================
+   3️⃣ SAVE RESUME (OK)
+================================ */
 export const saveResume = async (req, res) => {
   try {
     res.status(201).json({
       success: true,
-      message: "Resume saved successfully",
+      message: "Resume saved successfully"
     });
   } catch (error) {
     res.status(500).json({ message: "Resume save failed" });

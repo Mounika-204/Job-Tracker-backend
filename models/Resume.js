@@ -1,15 +1,35 @@
 import mongoose from "mongoose";
 
-const resumeSchema = mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+const resumeSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    roleType: {
+      type: String,
+      enum: ["frontend", "backend", "fullstack"],
+      required: true,
+    },
+
+    skills: {
+      type: [String],
+      default: [],
+    },
+
+    projects: {
+      type: [String],
+      default: [],
+    },
+
+    experience: {
+      type: String,
+      default: "",
+    },
   },
-  skills: [String],
-  projects: [String],
-  experience: String,
-  roleType: String, // frontend / backend / fullstack
-});
+  { timestamps: true }
+);
 
 export default mongoose.model("Resume", resumeSchema);

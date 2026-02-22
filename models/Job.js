@@ -7,7 +7,7 @@ const statusHistorySchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    default: Date.now, // ✅ AUTO DATE FIX
+    default: Date.now,
   },
 });
 
@@ -28,11 +28,20 @@ const jobSchema = new mongoose.Schema(
     },
     status: {
       type: String,
+      enum: ["Applied", "Interview", "Offer", "Rejected"],
       default: "Applied",
     },
     statusHistory: [statusHistorySchema],
   },
   { timestamps: true }
 );
+
+// auto add history on creation
+jobSchema.pre("save", function (next) {
+  if (this.isNew) {
+    this.statusHistory.push({ status: this.status });
+  }
+  next();
+});
 
 export default mongoose.model("Job", jobSchema);
