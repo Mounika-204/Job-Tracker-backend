@@ -16,8 +16,8 @@ export const createJob = async (req, res) => {
     const job = await Job.create({
       company,
       role,
-      status,
-      user: req.user.id, // ✅ FIX
+      status: status || "Applied",
+      user: req.user.id, // ✅ CORRECT
     });
 
     res.status(201).json(job);
@@ -25,13 +25,14 @@ export const createJob = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 /* ===============================
    GET JOBS
 ================================ */
 export const getJobs = async (req, res) => {
   try {
-    const jobs = await Job.find({ user: req.user._id }).sort({
-      createdAt: -1
+    const jobs = await Job.find({ user: req.user.id }).sort({
+      createdAt: -1,
     });
     res.json(jobs);
   } catch (error) {
@@ -40,7 +41,7 @@ export const getJobs = async (req, res) => {
 };
 
 /* ===============================
-   UPDATE JOB (company / role)
+   UPDATE JOB
 ================================ */
 export const updateJob = async (req, res) => {
   try {
@@ -49,7 +50,7 @@ export const updateJob = async (req, res) => {
     if (!job)
       return res.status(404).json({ message: "Job not found" });
 
-    if (job.user.toString() !== req.user._id.toString())
+    if (job.user.toString() !== req.user.id)
       return res.status(401).json({ message: "Not authorized" });
 
     job.company = req.body.company ?? job.company;
@@ -63,7 +64,7 @@ export const updateJob = async (req, res) => {
 };
 
 /* ===============================
-   UPDATE JOB STATUS (FIXED)
+   UPDATE JOB STATUS
 ================================ */
 export const updateJobStatus = async (req, res) => {
   try {
@@ -73,12 +74,12 @@ export const updateJobStatus = async (req, res) => {
       "Applied",
       "Interview",
       "Offer",
-      "Rejected"
+      "Rejected",
     ];
 
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({
-        message: "Invalid status value"
+        message: "Invalid status value",
       });
     }
 
@@ -87,13 +88,12 @@ export const updateJobStatus = async (req, res) => {
     if (!job)
       return res.status(404).json({ message: "Job not found" });
 
-    if (job.user.toString() !== req.user._id.toString())
+    if (job.user.toString() !== req.user.id)
       return res.status(401).json({ message: "Not authorized" });
 
     job.status = status;
-    job.statusHistory.push({ status });
-
     await job.save();
+
     res.json(job);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -110,7 +110,7 @@ export const deleteJob = async (req, res) => {
     if (!job)
       return res.status(404).json({ message: "Job not found" });
 
-    if (job.user.toString() !== req.user._id.toString())
+    if (job.user.toString() !== req.user.id)
       return res.status(401).json({ message: "Not authorized" });
 
     await job.deleteOne();

@@ -36,7 +36,7 @@ const jobSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// auto add history on creation
+// ✅ Auto add history on creation
 jobSchema.pre("save", function (next) {
   if (this.isNew) {
     this.statusHistory.push({ status: this.status });

@@ -3,16 +3,19 @@ import jwt from "jsonwebtoken";
 const protect = (req, res, next) => {
   let token;
 
-  if (req.headers.authorization?.startsWith("Bearer")) {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
     try {
       token = req.headers.authorization.split(" ")[1];
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // attach only ID (faster)
+      // attach user id
       req.user = { id: decoded.id };
 
-      next();
+      next(); // ✅ THIS must be function
     } catch (error) {
       return res.status(401).json({ message: "Not authorized, token failed" });
     }
@@ -21,4 +24,4 @@ const protect = (req, res, next) => {
   }
 };
 
-export default protect;
+export default protect; // ✅ VERY IMPORTANT
