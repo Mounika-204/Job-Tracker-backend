@@ -5,20 +5,19 @@ import Job from "../models/Job.js";
 ================================ */
 export const createJob = async (req, res) => {
   try {
-    const { company, role } = req.body;
+    const { company, role, status } = req.body;
 
     if (!company || !role) {
       return res.status(400).json({
-        message: "Company and role are required"
+        message: "Company and role are required",
       });
     }
 
     const job = await Job.create({
-      user: req.user._id,
       company,
       role,
-      status: "Applied",
-      statusHistory: [{ status: "Applied" }]
+      status,
+      user: req.user._id, // ✅ THIS IS THE FIX
     });
 
     res.status(201).json(job);
