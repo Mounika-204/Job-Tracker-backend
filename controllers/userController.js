@@ -57,36 +57,29 @@ export const registerUser = async (req, res) => {
 ========================= */
 export const loginUser = async (req, res) => {
   try {
-    console.log("LOGIN REQUEST:", req.body);
-
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password required" });
+      return res.status(400).json({
+        message: "Email and password required",
+      });
     }
 
-    const user = await User.findOne({ email });
-    console.log("USER:", user);
+    // 🔴 MAIN CHANGE IS HERE
+    const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    if (!user.password) {
-      console.error("Password missing in DB");
-      return res.status(500).json({ message: "Password not found" });
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log("PASSWORD MATCH:", isMatch);
 
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    if (!process.env.JWT_SECRET) {
-      console.error("JWT_SECRET NOT FOUND");
-      return res.status(500).json({ message: "JWT secret missing" });
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
     }
 
     const token = jwt.sign(
@@ -95,17 +88,18 @@ export const loginUser = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    return res.status(200).json({
-      id: user._id,
-      name: user.name,
-      email: user.email,
+    res.status(200).json({
+      message: "Login successful",
       token,
-      message: "Login successful"
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
     });
 
   } catch (error) {
-    console.error("LOGIN ERROR:", error);
-    return res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: error.message });
   }
 };
 /* =========================
