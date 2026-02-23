@@ -17,7 +17,7 @@ export const createJob = async (req, res) => {
       company,
       role,
       status,
-      user: req.user._id, // ✅ THIS IS THE FIX
+      user: req.user.id, // ✅ FIX
     });
 
     res.status(201).json(job);
@@ -25,7 +25,6 @@ export const createJob = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 /* ===============================
    GET JOBS
 ================================ */
