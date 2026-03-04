@@ -1,7 +1,7 @@
 // middleware/authMiddleware.js
 import jwt from "jsonwebtoken";
-import User from "../models/User.js"; // path correct ga unte
-
+import User from "../models/User.js"; // path correct ga untey
+console.log("🔥🔥 AUTH MIDDLEWARE LOADED - NEW VERSION 🔥🔥");
 const protect = async (req, res, next) => {
   let token;
 

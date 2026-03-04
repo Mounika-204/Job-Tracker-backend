@@ -7,6 +7,11 @@ export const createJob = async (req, res) => {
   try {
     const { company, role, status } = req.body;
 
+    // Safety check (auth middleware fail ayithe crash avvakunda)
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "User not authorized" });
+    }
+
     if (!company || !role) {
       return res.status(400).json({
         message: "Company and role are required",
@@ -17,12 +22,14 @@ export const createJob = async (req, res) => {
       company,
       role,
       status: status || "Applied",
-      user: req.user.id, // ✅ CORRECT
+      user: req.user.id,
     });
 
     res.status(201).json(job);
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("CREATE JOB ERROR:", error);
+    res.status(500).json({ message: "Failed to create job" });
   }
 };
 
@@ -31,12 +38,19 @@ export const createJob = async (req, res) => {
 ================================ */
 export const getJobs = async (req, res) => {
   try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "User not authorized" });
+    }
+
     const jobs = await Job.find({ user: req.user.id }).sort({
       createdAt: -1,
     });
+
     res.json(jobs);
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("GET JOBS ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch jobs" });
   }
 };
 
@@ -58,8 +72,10 @@ export const updateJob = async (req, res) => {
 
     await job.save();
     res.json(job);
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("UPDATE JOB ERROR:", error);
+    res.status(500).json({ message: "Failed to update job" });
   }
 };
 
@@ -70,12 +86,7 @@ export const updateJobStatus = async (req, res) => {
   try {
     const { status } = req.body;
 
-    const allowedStatuses = [
-      "Applied",
-      "Interview",
-      "Offer",
-      "Rejected",
-    ];
+    const allowedStatuses = ["Applied", "Interview", "Offer", "Rejected"];
 
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({
@@ -95,8 +106,10 @@ export const updateJobStatus = async (req, res) => {
     await job.save();
 
     res.json(job);
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("UPDATE STATUS ERROR:", error);
+    res.status(500).json({ message: "Failed to update job status" });
   }
 };
 
@@ -114,8 +127,10 @@ export const deleteJob = async (req, res) => {
       return res.status(401).json({ message: "Not authorized" });
 
     await job.deleteOne();
-    res.json({ message: "Job removed" });
+    res.json({ message: "Job removed successfully" });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("DELETE JOB ERROR:", error);
+    res.status(500).json({ message: "Failed to delete job" });
   }
 };
