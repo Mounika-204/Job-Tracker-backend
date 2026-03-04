@@ -1,23 +1,7 @@
 import mongoose from "mongoose";
 
-const statusHistorySchema = new mongoose.Schema({
-  status: {
-    type: String,
-    required: true,
-  },
-  date: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
 const jobSchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
     company: {
       type: String,
       required: true,
@@ -31,17 +15,14 @@ const jobSchema = new mongoose.Schema(
       enum: ["Applied", "Interview", "Offer", "Rejected"],
       default: "Applied",
     },
-    statusHistory: [statusHistorySchema],
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-// ✅ Auto add history on creation
-jobSchema.pre("save", function (next) {
-  if (this.isNew) {
-    this.statusHistory.push({ status: this.status });
-  }
-  next();
-});
-
-export default mongoose.model("Job", jobSchema);
+const Job = mongoose.model("Job", jobSchema);
+export default Job;
