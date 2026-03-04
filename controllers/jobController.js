@@ -7,8 +7,8 @@ export const createJob = async (req, res) => {
   try {
     const { company, role, status } = req.body;
 
-    // Safety check (auth middleware fail ayithe crash avvakunda)
-    if (!req.user || !req.user.id) {
+    // ✅ Correct user check
+    if (!req.user || !req.user._id) {
       return res.status(401).json({ message: "User not authorized" });
     }
 
@@ -22,7 +22,7 @@ export const createJob = async (req, res) => {
       company,
       role,
       status: status || "Applied",
-      user: req.user.id,
+      user: req.user._id, // ✅ FIXED
     });
 
     res.status(201).json(job);
@@ -38,11 +38,11 @@ export const createJob = async (req, res) => {
 ================================ */
 export const getJobs = async (req, res) => {
   try {
-    if (!req.user || !req.user.id) {
+    if (!req.user || !req.user._id) {
       return res.status(401).json({ message: "User not authorized" });
     }
 
-    const jobs = await Job.find({ user: req.user.id }).sort({
+    const jobs = await Job.find({ user: req.user._id }).sort({
       createdAt: -1,
     });
 
@@ -64,7 +64,7 @@ export const updateJob = async (req, res) => {
     if (!job)
       return res.status(404).json({ message: "Job not found" });
 
-    if (job.user.toString() !== req.user.id)
+    if (job.user.toString() !== req.user._id.toString())
       return res.status(401).json({ message: "Not authorized" });
 
     job.company = req.body.company ?? job.company;
@@ -99,7 +99,7 @@ export const updateJobStatus = async (req, res) => {
     if (!job)
       return res.status(404).json({ message: "Job not found" });
 
-    if (job.user.toString() !== req.user.id)
+    if (job.user.toString() !== req.user._id.toString())
       return res.status(401).json({ message: "Not authorized" });
 
     job.status = status;
@@ -123,7 +123,7 @@ export const deleteJob = async (req, res) => {
     if (!job)
       return res.status(404).json({ message: "Job not found" });
 
-    if (job.user.toString() !== req.user.id)
+    if (job.user.toString() !== req.user._id.toString())
       return res.status(401).json({ message: "Not authorized" });
 
     await job.deleteOne();
