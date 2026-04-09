@@ -14,10 +14,20 @@ const app = express();
 /* ✅ BODY PARSER */
 app.use(express.json());
 
-/* ✅ CORS */
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://job-tracker-frontend-5m6x.onrender.com"
+];
+
 app.use(
   cors({
-    origin:"https://job-tracker-frontend-5m6x.onrender.com",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -26,9 +36,7 @@ app.use(
 
 /* ✅ URL CLEAN + LOG (VERY IMPORTANT) */
 app.use((req, res, next) => {
-  // decode %0A, %20 etc
-  const decodedUrl = decodeURIComponent(req.url);
-  req.url = decodedUrl.replace(/\s+/g, "");
+  req.url = decodeURIComponent(req.url);
   console.log("Incoming request:", req.method, req.url);
   next();
 });
