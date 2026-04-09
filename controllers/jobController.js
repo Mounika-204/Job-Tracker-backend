@@ -7,7 +7,6 @@ export const createJob = async (req, res) => {
   try {
     const { company, role, status } = req.body;
 
-    // ✅ Correct user check
     if (!req.user || !req.user._id) {
       return res.status(401).json({ message: "User not authorized" });
     }
@@ -22,7 +21,15 @@ export const createJob = async (req, res) => {
       company,
       role,
       status: status || "Applied",
-      user: req.user._id, // ✅ FIXED
+      user: req.user._id,
+
+      // ✅ ADD STATUS HISTORY
+      statusHistory: [
+        {
+          status: status || "Applied",
+          date: new Date(),
+        },
+      ],
     });
 
     res.status(201).json(job);
@@ -86,7 +93,15 @@ export const updateJobStatus = async (req, res) => {
   try {
     const { status } = req.body;
 
-    const allowedStatuses = ["Applied", "Interview", "Offer", "Rejected"];
+    // ✅ MATCH FRONTEND STATUSES
+    const allowedStatuses = [
+      "Applied",
+      "Screening",
+      "Technical",
+      "HR",
+      "Offer",
+      "Rejected"
+    ];
 
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({
@@ -103,6 +118,13 @@ export const updateJobStatus = async (req, res) => {
       return res.status(401).json({ message: "Not authorized" });
 
     job.status = status;
+
+    // ✅ ADD TO STATUS HISTORY
+    job.statusHistory.push({
+      status,
+      date: new Date(),
+    });
+
     await job.save();
 
     res.json(job);
