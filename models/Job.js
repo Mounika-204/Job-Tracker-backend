@@ -10,15 +10,36 @@ const jobSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
+    // ✅ FIXED STATUS ENUM
     status: {
       type: String,
-      enum: ["Applied", "Interview", "Offer", "Rejected"],
+      enum: [
+        "Applied",
+        "Screening",
+        "Technical",
+        "HR",
+        "Offer",
+        "Rejected",
+      ],
       default: "Applied",
     },
+
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+
+    // ✅ ADD THIS (VERY IMPORTANT)
+    statusHistory: {
+      type: [
+        {
+          status: String,
+          date: Date,
+        },
+      ],
+      default: [], // 🔥 THIS FIXES 500 ERROR
     },
   },
   { timestamps: true }
