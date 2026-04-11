@@ -3,7 +3,7 @@ const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse");
 
 /* ===============================
-   1️⃣ GENERATE RESUME (FIXED)
+   1️⃣ GENERATE RESUME
 ================================ */
 export const generateResume = async (req, res) => {
   try {
@@ -21,7 +21,7 @@ export const generateResume = async (req, res) => {
     let summary = "";
     let projects = [];
 
-    /* 🔹 Dynamic skill extraction */
+    // 🔹 Skill extraction
     if (jd.includes("react")) skills.push("React");
     if (jd.includes("javascript")) skills.push("JavaScript");
     if (jd.includes("html")) skills.push("HTML");
@@ -29,8 +29,10 @@ export const generateResume = async (req, res) => {
     if (jd.includes("node")) skills.push("Node.js");
     if (jd.includes("express")) skills.push("Express");
     if (jd.includes("mongo")) skills.push("MongoDB");
+    if (jd.includes("python")) skills.push("Python");
+    if (jd.includes("sql")) skills.push("SQL");
 
-    /* 🔹 Role based summary */
+    // 🔹 Role based summary
     if (jobRole.toLowerCase().includes("frontend")) {
       summary =
         "Frontend Developer skilled in building responsive and interactive web applications using modern JavaScript frameworks.";
@@ -41,7 +43,7 @@ export const generateResume = async (req, res) => {
       projects = ["Job Tracker API", "Auth System"];
     } else {
       summary =
-        "Software Developer with strong problem-solving skills and full-stack development experience.";
+        "Full Stack Developer with strong problem-solving skills and experience in building scalable applications.";
       projects = ["Job Tracker Full Stack Project"];
     }
 
@@ -68,7 +70,7 @@ export const generateResume = async (req, res) => {
 };
 
 /* ===============================
-   2️⃣ OPTIMIZE RESUME (OK)
+   2️⃣ OPTIMIZE RESUME
 ================================ */
 export const optimizeResume = async (req, res) => {
   try {
@@ -85,7 +87,7 @@ export const optimizeResume = async (req, res) => {
     const resumeText = pdfData.text;
 
     const extractedSkills =
-      resumeText.match(/HTML|CSS|JavaScript|React|Node|Express|MongoDB/gi) || [];
+      resumeText.match(/HTML|CSS|JavaScript|React|Node|Express|MongoDB|Python|SQL/gi) || [];
 
     res.status(200).json({
       success: true,
@@ -101,7 +103,58 @@ export const optimizeResume = async (req, res) => {
 };
 
 /* ===============================
-   3️⃣ SAVE RESUME (OK)
+   3️⃣ MATCH RESUME WITH JD 🔥 (NEW)
+================================ */
+export const matchResume = async (req, res) => {
+  try {
+    const { jobDescription } = req.body;
+    const resumeFile = req.file;
+
+    if (!resumeFile || !jobDescription) {
+      return res.status(400).json({
+        message: "Resume file and jobDescription are required"
+      });
+    }
+
+    const pdfData = await pdfParse(resumeFile.buffer);
+    const resumeText = pdfData.text.toLowerCase();
+    const jdText = jobDescription.toLowerCase();
+
+    // 🔹 remove useless words
+    const stopWords = ["the", "and", "or", "is", "a", "to", "of", "in"];
+
+    const resumeWords = resumeText
+      .split(/\W+/)
+      .filter(word => !stopWords.includes(word));
+
+    const jobWords = jdText
+      .split(/\W+/)
+      .filter(word => !stopWords.includes(word));
+
+    const matched = jobWords.filter(word =>
+      resumeWords.includes(word)
+    );
+
+    const missing = jobWords.filter(word =>
+      !resumeWords.includes(word)
+    );
+
+    const score = Math.round((matched.length / jobWords.length) * 100);
+
+    res.status(200).json({
+      score,
+      matched: [...new Set(matched)].slice(0, 20),
+      missing: [...new Set(missing)].slice(0, 20),
+    });
+
+  } catch (error) {
+    console.error("MATCH ERROR:", error);
+    res.status(500).json({ message: "Matching failed" });
+  }
+};
+
+/* ===============================
+   4️⃣ SAVE RESUME
 ================================ */
 export const saveResume = async (req, res) => {
   try {
