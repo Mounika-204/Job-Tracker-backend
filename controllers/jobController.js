@@ -125,10 +125,15 @@ export const updateJobStatus = async (req, res) => {
 
     job.status = status;
 
+    // ✅ FIX: ensure array exists
+    if (!job.statusHistory) {
+       job.statusHistory = [];
+    }
+
     job.statusHistory.push({
       status,
       date: new Date(),
-    });
+   });
 
     await job.save();
 
